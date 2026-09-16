@@ -1,0 +1,166 @@
+{
+  "info": {
+    "name": "AGT Facturação — Proxy API",
+    "description": "Proxy de assinatura/reencaminhamento para a Facturação Electrónica da AGT (Angola). Importa também o ficheiro de environment (postman_environment.json) para preencher {{base_url}} e {{api_key}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "apikey",
+    "apikey": [
+      { "key": "key", "value": "x-api-key", "type": "string" },
+      { "key": "value", "value": "{{api_key}}", "type": "string" },
+      { "key": "in", "value": "header", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000" },
+    { "key": "api_key", "value": "muda-me" }
+  ],
+  "item": [
+    {
+      "name": "Sistema",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/health",
+            "auth": { "type": "noauth" }
+          }
+        },
+        {
+          "name": "Documentação OpenAPI (JSON)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api-docs.json",
+            "auth": { "type": "noauth" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Séries",
+      "item": [
+        {
+          "name": "Solicitar série",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/series",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tax_id\": \"5000000000\",\n  \"private_key\": \"-----BEGIN RSA PRIVATE KEY-----\\n...\\n-----END RSA PRIVATE KEY-----\",\n  \"document_type\": \"FT\",\n  \"establishment\": \"SEDE\",\n  \"year\": 2026,\n  \"contingency_indicator\": \"N\",\n  \"test\": true,\n  \"nome_empresa\": \"Empresa Exemplo, Lda\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Faturas",
+      "item": [
+        {
+          "name": "Registar factura (FT)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/faturas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tax_id\": \"5000000000\",\n  \"private_key\": \"-----BEGIN RSA PRIVATE KEY-----\\n...\\n-----END RSA PRIVATE KEY-----\",\n  \"document_type\": \"FT\",\n  \"document_no\": \"FT SEDE/1\",\n  \"customer_tax_id\": \"999999999\",\n  \"net_total\": 1000,\n  \"tax_payable\": 140,\n  \"gross_total\": 1140,\n  \"test\": true,\n  \"lines\": [\n    { \"product_code\": \"SERV001\", \"product_description\": \"Serviço\", \"quantity\": 1, \"unit_price\": 1000, \"tax_percentage\": 14, \"tax_contribution\": 140 }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Registar Nota de Crédito (NC)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/faturas/nota-credito",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tax_id\": \"5000000000\",\n  \"private_key\": \"-----BEGIN RSA PRIVATE KEY-----\\n...\\n-----END RSA PRIVATE KEY-----\",\n  \"test\": true,\n  \"document_no\": \"NC SEDE/1\",\n  \"reference\": \"FT SEDE/1\",\n  \"reason\": \"Correcção de factura emitida com erro\",\n  \"net_total\": 1000,\n  \"tax_payable\": 140,\n  \"gross_total\": 1140,\n  \"lines\": [\n    { \"product_code\": \"SERV001\", \"product_description\": \"Serviço\", \"quantity\": 1, \"unit_price\": 1000, \"debit_amount\": 1000, \"tax_percentage\": 14, \"tax_contribution\": 140 }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Registar Nota de Débito (ND)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/faturas/nota-debito",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tax_id\": \"5000000000\",\n  \"private_key\": \"-----BEGIN RSA PRIVATE KEY-----\\n...\\n-----END RSA PRIVATE KEY-----\",\n  \"test\": true,\n  \"document_no\": \"ND SEDE/1\",\n  \"net_total\": 1000,\n  \"tax_payable\": 140,\n  \"gross_total\": 1140,\n  \"lines\": [\n    { \"product_code\": \"SERV001\", \"product_description\": \"Serviço\", \"quantity\": 1, \"unit_price\": 1000, \"tax_percentage\": 14, \"tax_contribution\": 140 }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Anular documento",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/faturas/anular",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tax_id\": \"5000000000\",\n  \"private_key\": \"-----BEGIN RSA PRIVATE KEY-----\\n...\\n-----END RSA PRIVATE KEY-----\",\n  \"test\": true,\n  \"document_type\": \"FT\",\n  \"document_no\": \"FT SEDE/1\",\n  \"rejected_document_no\": \"FT SEDE/1\",\n  \"document_cancel_reason\": \"Erro de digitação\",\n  \"net_total\": 1000, \"tax_payable\": 140, \"gross_total\": 1140,\n  \"lines\": [\n    { \"product_code\": \"SERV001\", \"product_description\": \"Serviço\", \"quantity\": 1, \"unit_price\": 1000, \"tax_percentage\": 14, \"tax_contribution\": 140 }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Corrigir documento",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/faturas/corrigir",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tax_id\": \"5000000000\",\n  \"private_key\": \"-----BEGIN RSA PRIVATE KEY-----\\n...\\n-----END RSA PRIVATE KEY-----\",\n  \"test\": true,\n  \"document_type\": \"FT\",\n  \"document_no\": \"FT SEDE/1\",\n  \"rejected_document_no\": \"FT SEDE/1\",\n  \"document_cancel_reason\": \"Valor errado\",\n  \"net_total\": 1000, \"tax_payable\": 140, \"gross_total\": 1140,\n  \"lines\": [\n    { \"product_code\": \"SERV001\", \"product_description\": \"Serviço\", \"quantity\": 1, \"unit_price\": 1000, \"tax_percentage\": 14, \"tax_contribution\": 140 }\n  ]\n}"
+            }
+          }
+        },
+        {
+          "name": "Consultar estado",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/api/faturas/estado",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tax_id\": \"5000000000\",\n  \"private_key\": \"-----BEGIN RSA PRIVATE KEY-----\\n...\\n-----END RSA PRIVATE KEY-----\",\n  \"requestID\": \"o-requestID-devolvido-por-POST-/api/faturas\",\n  \"test\": true\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Logs (auditoria)",
+      "item": [
+        {
+          "name": "Listar logs",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/logs?limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["api", "logs"],
+              "query": [
+                { "key": "nif", "value": "", "disabled": true },
+                { "key": "tipo", "value": "", "disabled": true },
+                { "key": "document_no", "value": "", "disabled": true },
+                { "key": "request_id", "value": "", "disabled": true },
+                { "key": "limit", "value": "50" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Obter log por id",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/logs/1"
+          }
+        }
+      ]
+    }
+  ]
+}
